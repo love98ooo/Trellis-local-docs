@@ -11,7 +11,7 @@ title: '附录 F：FAQ'
 新请求直接用自然语言描述即可。有 active task 且希望 AI 推进到下一步时，再用
 `/trellis:continue`。
 
-之前 `/trellis:start` 显式注入的那套上下文 —— 当前开发者身份、git 分支和
+之前 `/trellis:start` 显式注入的那套上下文 —— 当前 worktree、git 分支和
 状态、active task、active tasks 列表、`workflow.md` 的 phase index、spec
 index 路径、最近 journal 摘要 —— 现在由各平台自己的启动路径交付。Claude-style
 平台走 SessionStart hook 或 extension。Codex 走 `AGENTS.md` 加
@@ -25,12 +25,12 @@ AI 会读 task 状态、artifact presence 和 `workflow.md` 决定下一步。
 
 ### Q2: 怎么把已有项目迁到 Trellis？
 
-1. `npm install -g @mindfoldhq/trellis@beta`
-2. 项目根下 `trellis init -u your-name`（自动建 bootstrap 任务）。
+1. `# Use a verified fork CLI build at an immutable absolute path.`
+2. 项目根下 `trellis init`（自动建 bootstrap 任务）。
 3. 打开已配置 Trellis 的 AI 会话；如果平台没有自动会话注入，就运行对应 start workflow。brainstorm skill 会帮你填初始 spec。
-4. 按团队约定手动补充核心 spec。
+4. 按项目约定手动补充核心 spec。
 5. 把 `.trellis/` 和你用的 `.{platform}/` 目录 add 并 commit。
-6. 队友 pull 后各自 `trellis init -u their-name`。
+6. 队友 pull 后各自 `trellis init`。
 
 ### Q3: `trellis init` 模板选项里的 `scratch` 是啥？
 
@@ -43,33 +43,17 @@ AI 会读 task 状态、artifact presence 和 `workflow.md` 决定下一步。
 ```bash
 # 1. 装 Node.js 18+ 和 Python 3.9+
 # 2. 装 Trellis
-npm install -g @mindfoldhq/trellis@beta
+# Use a verified fork CLI build at an immutable absolute path.
 # 3. 初始化
 cd your-project
-trellis init -u your-name
+trellis init
 ```
 
 `trellis init` 现在会自动把 `CLAUDE_BASH_MAINTAIN_PROJECT_WORKING_DIR=1` 写进 `.claude/settings.json`。这个环境变量让 Bash 工具的 cwd 保持稳定，hook 脚本在 Windows 上也能正确解析路径——不需要手动配。
 
 ### Q5: 更新 Trellis 时怎么不丢自定义内容？
 
-先升级全局 CLI：
-
-```bash
-trellis upgrade                              # CLI 0.6.0+
-npm install -g @mindfoldhq/trellis@beta      # CLI 0.5.x 或更早（还没有 upgrade 命令）
-```
-
-再同步项目文件：
-
-```bash
-trellis update --dry-run   # 预演
-trellis update             # 应用
-```
-
-Trellis 在安装时对每个模板文件算 hash。update 时发现你改过的文件：未改的自动覆盖，改过的会询问（覆盖 / 跳过）。用 `-f` 全部强制覆盖、`-s` 全部跳过。
-
-大版本时加 `--migrate` 应用 migration manifest 里的 rename / delete。不加 `--migrate` 碰到破坏性 manifest 会打印说明并退出，不静默重命名。
+在 fork 源仓库检出并验证目标版本后，运行 `pnpm local:install` 更新独立安装的 `trellis-local`。随后在目标 worktree 先运行 `trellis-local update --dry-run` 审阅，再按仓库要求运行 `trellis-local update`；需要文件迁移时使用 `--migrate`。
 
 ### Q6: 从 0.4.x 升级到 0.5.0 怎么走最安全？
 
@@ -85,28 +69,13 @@ trellis update                       # 验证：应该提示 "Already up to date
 
 ### Q7: 跑 `trellis update` 显示 `0.4.0 → 0.4.0`，没升上去，怎么回事？
 
-升级是两步，对应两个层面：
-
-```bash
-trellis upgrade                           # 1. 升级 CLI 本身（CLI 0.6.0+）
-trellis update --migrate                  # 2. 把项目同步到 CLI 当前版本
-```
-
-`trellis update` 只把项目升到当前 CLI 版本。如果 CLI 自己还是 0.4.0，那项目最多也只能到 0.4.0。先加入 beta channel，再跑 `trellis update --migrate`。
-
-如果你的 CLI 早于 0.6.0，`trellis upgrade` 命令还不存在——第 1 步改用 `npm install -g @mindfoldhq/trellis@beta`，之后 `trellis upgrade` 会继续跟随 beta channel。
+在 fork 源仓库检出并验证目标版本后，运行 `pnpm local:install` 更新独立安装的 `trellis-local`。随后在目标 worktree 先运行 `trellis-local update --dry-run` 审阅，再按仓库要求运行 `trellis-local update`；需要文件迁移时使用 `--migrate`。
 
 ## 核心概念
 
 ### Q8: 会话历史存在哪？
 
-```
-.trellis/workspace/
-├── index.md              # 所有开发者的主索引
-└── {your-name}/
-    ├── index.md          # 个人索引
-    └── journal-N.md      # 会话日志（约每 2000 行新起一个文件）
-```
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q9: spec 写多细？
 
@@ -170,15 +139,7 @@ sub-agent 是给主 agent 当工具用的：每次调用是一段隔离的子任
 
 ### Q17: 切换 AI 编码工具时要重配吗？
 
-不用。`trellis init` 带多个平台 flag 能一次写多份。已经用了 Cursor 后来想加 Claude Code 和 Pi Agent：
-
-```bash
-trellis init -u your-name --claude --pi
-```
-
-`.trellis/` 跨工具共享，只是多写一个 `.{platform}/` 目录。
-
-不想敲 flag 也行 —— 直接 `trellis init` 会进入交互模式，让你选"添加新平台 / 添加开发者 / 全部重新初始化"。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ## 使用与工作流
 
@@ -192,28 +153,21 @@ trellis init -u your-name --claude --pi
 
 ### Q20: 同时跑多个 task 时文件会不会互相污染？
 
-每个 task 有独立目录 `.trellis/tasks/<MM-DD-slug>/`，里面 `prd.md` / `research/` / `implement.jsonl` / `check.jsonl` 各自隔离。sub-agent 只读当前 active task 的 jsonl，所以跨 task 的 spec 注入自动按任务范围分隔。开发者级 journal 在 `.trellis/workspace/<name>/`，也是隔离的。
+每个 task 有独立目录 `.trellis/tasks/<MM-DD-slug>/`，里面 `prd.md` / `research/` / `implement.jsonl` / `check.jsonl` 各自隔离。sub-agent 只读当前 active task 的 jsonl，所以跨 task 的 spec 注入自动按任务范围分隔。开发者级 journal 在 `.trellis/workspace/`，也是隔离的。
 
 **不会自动隔离的**：task A 的 `research/` 里如果留了死路结论或错误实现，下次重新进入 task A 时 AI 会重新读到。习惯做法：研究失败的文档在文件顶部标 `## DEPRECATED`，不要留模糊的内容。
 
 ### Q21: 必须先 commit 代码才能 `/trellis:finish-work` archive / record 吗？
 
-`/trellis:finish-work` 写 session journal 会带上 commit hash，所以 commit 要在前面。如果只想归档 task 不写 journal，可以直接 `task.py archive <task-name>`，不用 commit。
-
-推荐顺序：Phase 3.4 commit → `/trellis:finish-work`（archive + 写 journal）。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q22: 每个任务带 work + archive + journal 三个 commit，是不是太冗余？
 
-3 个 commit 来自不同层：你自己的 work commit（Phase 3.4）；`task.py archive` 写一个 `chore(task): archive ...` commit；`add_session.py` 写一个 `chore: record journal` commit。合并 PR 时用 squash merge 把它们压成一个就行。如果想保留作为独立历史，work commit 是真正有意义的；archive / journal 是 housekeeping 类，`git log --invert-grep -E '^chore'` 就能过滤掉。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q23: AI 有时候会跳过 trellis 流程直接写代码，怎么把它拉回来？
 
-两个施压点：
-
-1. **明确重申规则。** "停。我们用 Trellis。先分类请求，并在进入 planning 前征求创建 task 的同意。" AI 会按你**实际守住的边界**校准，不会按你**希望守住的边界**校准。
-2. **加强 workflow-state hook。** `inject-workflow-state.py` hook 每轮根据当前 task 状态注入面包屑。如果团队这种跳步频繁，可以 fork `workflow.md`，在 `[workflow-state:no_task]` 块里加更严格的提示，没有审过的 PRD 就拒绝进入 Execute。
-
-这是跨模型的常见缺陷（Claude / GPT / DeepSeek 都会犯）。框架能减少不能消除，阶段边界仍然需要人介入。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q24: monorepo（前后端同仓）怎么用 Trellis？
 
@@ -226,7 +180,7 @@ trellis init -u your-name --claude --pi
 三层：
 
 - **Spec** —— 当 task A 总结出代码库或规范层面的稳定结论时，跑 `/trellis:update-spec` 把它写进 `.trellis/spec/`。后续 task 的 `implement.jsonl` 里列了这个 spec 就会自动注入。
-- **Workspace journal** —— `.trellis/workspace/<name>/journal-*.md` 跨 task 承载同一个开发者的会话上下文。SessionStart hook 会把最近 journal 显示给 AI。
+- **Workspace journal** —— `.trellis/workspace/journal-*.md` 跨 task 承载当前 worktree 的会话上下文。SessionStart hook 会把最近 journal 显示给 AI。
 - **Task PRD 引用** —— task B 的 `prd.md` 可以显式链接 task A 的 `prd.md` 或 `research/` 文件，brainstorm phase 会把它们作为上下文拉进来。
 
 **不会自动流转的**：task A 的 `research/` 不会自动注入到 task B。结论稳定的提到 spec；任务特有的留在源 task 里、显式引用即可。
@@ -239,56 +193,27 @@ trellis init -u your-name --claude --pi
 
 可以。已经有用户把 Trellis 搬到长文写作，把 prose 当代码处理：`prd.md` 定义这篇要论证什么、什么不写；`.trellis/spec/` 放语气 / 结构 / 引用格式规则；`implement.jsonl` 列写作 agent 需要的上下文；`check.jsonl` 列编辑 checklist 和事实校验规则；`journal-*.md` 记录决定了什么、删掉了什么。报告的提效幅度：同等质量下产出快 20-30%，主要省在"每次都得提醒 AI 风格指南"这一项。Trellis 帮不了创意火花，只帮一致性和"不用反复解释自己"。
 
-### Q28: `.trellis/` 在 `.gitignore` 里时，怎么关掉 auto-commit？
+### Q28: 如何保留本地日志？
 
-`.gitignore` 排除 `.trellis/` 时脚本会尊重它 — 打印警告并跳过 `git add` / `git commit`。journal 和 task archive 文件仍写入磁盘，只是不进 git。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
-要显式关掉 auto-commit（不管 `.gitignore`），在 `.trellis/config.yaml` 里设：
-
-```yaml
-session_auto_commit: false
-```
-
-默认 `true`，接受 `true / false / yes / no / 1 / 0 / on / off`。影响 `add_session.py`（journal）和 `task.py archive`（任务归档）。
-
-## 团队协作与跨项目
+## 个人 worktree 与跨项目
 
 ### Q29: 多人用 Trellis 会冲突吗？
 
-按开发者和会话隔离（`workspace/{name}/`、`.developer`、`.runtime/sessions/<session-key>.json`）。共享状态是 `.trellis/spec/` 和 `.trellis/tasks/`，走 PR review。建任务时用 `--assignee` 避免撞车。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q30: `.trellis/` 哪些目录要 git 跟踪？哪些 ignore？
 
-默认全部跟踪。`.trellis/` 设计就是团队共享目录：
-
-- `.trellis/spec/` —— 共享规范，跟踪
-- `.trellis/tasks/` —— 任务 PRD、research、上下文，跟踪
-- `.trellis/workspace/<name>/` —— 个人 journal，跟踪（队友能互相看到进度）
-- `.trellis/workflow.md`、`scripts/` —— 跟踪
-
-`.trellis/.gitignore` 已经自动忽略：`.developer`、`.current-task`、`.runtime/`、`.backup-*`、`*.tmp`、`*.pyc` —— 运行时 / 个人指针文件。
-
-如果把整个 `.trellis/` 放进项目根的 `.gitignore`，AI 仍然能读（文件系统层面工作正常），但你失去 team coordination 这一层 —— 这层正是 Trellis 的核心价值。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q31: 队友没有都装 Trellis，我的改动（尤其 `AGENTS.md`）会影响他们吗？
 
-冲突面很小。`AGENTS.md` 是 Trellis 写入、且非 Trellis 用户也会改的唯一文件；Trellis 写的内容用 `<!-- TRELLIS:START -->` / `<!-- TRELLIS:END -->` marker 包起来，marker 外面的内容不动。
-
-队友完全不想要 Trellis 内容时：
-
-- 直接跳过 `AGENTS.md` 写入，`.trellis/` 工作不依赖它。
-- 把 `.trellis/`、`.codex/`、`.agents/`、`.claude/` 等加到**本地** `.git/info/exclude`（per-clone，不提交），把 Trellis 当成纯私人层。
-- 或者只 commit `.trellis/spec/`，仓库级 gitignore 平台 `.{name}/` 目录。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q32: 新项目要从头沉淀 spec 吗？跨项目通用规则怎么复用？
 
-不用从头写。把团队通用规则维护成你自己的 spec 模板仓库，新项目用 `trellis init -r <git-url>` 直接拉：
-
-```bash
-trellis init -r git@github.com:your-org/trellis-spec-template.git
-```
-
-支持 GitHub / GitLab / Bitbucket / 自托管 GitLab（HTTPS / SSH 都行）。这样团队级编码规范由内网 git 服务器集中分发，不用每个项目手抄一遍。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ## 定制与兼容
 
@@ -316,15 +241,7 @@ trellis init -r git@github.com:your-org/trellis-spec-template.git
 
 ### Q35: 怎么把 Trellis 改成符合我们团队习惯的样子？
 
-用 `trellis-meta` skill。它专门为二开 Trellis 而做：删 / 加 phase（比如本地嫌 check 慢直接去掉，或者加 PRD 准入门禁、系统测试门禁）、改 skill 触发条件、改 sub-agent prompt、定制 workflow-state 文案，全部通过 skill 引导你修改 `.trellis/workflow.md` 和相关模板。
-
-安装：
-
-```bash
-npx skills add mindfold-ai/marketplace --skill trellis-meta
-```
-
-更多见 [`docs.trytrellis.app/zh/skills-market/trellis-meta`](https://docs.trytrellis.app/zh/skills-market/trellis-meta)。所有改动都是 markdown，不用碰 Python 或 hook 代码。
+参见当前 worktree 的 `.trellis/workflow.md` 和[工作流生成源](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md)。
 
 ### Q36: Obsidian 看不到 `.trellis/` 目录怎么办？
 

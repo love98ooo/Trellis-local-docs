@@ -5,7 +5,7 @@ title: 'Custom Spec Template Marketplace'
 ## Custom Spec Template Marketplace
 
 A spec template marketplace is a Git-backed source that `trellis init --registry`
-can read when a team wants the same `.trellis/spec/` starting point across many
+can read when you want the same `.trellis/spec/` starting point across many
 repositories.
 
 Use it for reusable engineering conventions: framework layout, API patterns,
@@ -168,7 +168,7 @@ Do not include:
 
 ### Versioning and rollout
 
-Treat template ids as public API for your team. If you need a breaking rewrite,
+Treat template ids as public API for your project. If you need a breaking rewrite,
 publish a new id such as `web-app-v2` or pin the old behavior to a Git ref:
 
 ```bash

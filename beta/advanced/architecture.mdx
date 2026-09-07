@@ -8,7 +8,7 @@ In implementation terms, that means two systems share the same project files:
 
 - **Agent Harness**: workflow state, hooks, skills, sub-agents, and platform adapters that control how AI coding work moves.
 - **Built-in LLM wiki**: specs, tasks, research, and journals stored in the repository so AI sessions can reload project knowledge from files.
-- **Team-level layer**: git-tracked workflow/spec/task files plus per-developer workspace memory, so multiple people and multiple AI tools operate against the same conventions.
+- **Team-level layer**: git-tracked workflow/spec/task files plus personal worktree workspace memory, so multiple people and multiple AI tools operate against the same conventions.
 
 This document maps that idea to the current Trellis feature set, the modules that implement each feature, and the files to inspect when customizing a generated project. For the user flow, see [How It Works](/start/how-it-works).
 
@@ -46,19 +46,18 @@ Trellis treats AI coding as a workflow and knowledge-management problem, not a s
 | ----------------------- | ----------------------------------------------------------------------------------------------------- |
 | Spec library            | Project conventions and thinking guides under `.trellis/spec/`.                                       |
 | Task knowledge          | PRDs, technical designs, implementation plans, research, and JSONL manifests under `.trellis/tasks/`. |
-| Workspace memory        | Per-developer journals under `.trellis/workspace/<developer>/`.                                       |
+| Workspace memory        | Per-developer journals under `.trellis/workspace/`.                                                   |
 | Workflow documentation  | The executable workflow contract in `.trellis/workflow.md`.                                           |
 | Local customization map | Bundled `trellis-meta` references explaining which generated files own each behavior.                 |
 
 ### Team-level behavior
 
-| Feature                              | What it enables                                                                                           |
-| ------------------------------------ | --------------------------------------------------------------------------------------------------------- |
-| Git-tracked workflow/spec/task files | New team members clone the same workflow and conventions.                                                 |
-| Per-session active task pointers     | Multiple windows can work on different tasks without sharing one global current task.                     |
-| Subtask trees                        | Parent tasks can hold shared requirements while child tasks run their own Plan -> Execute -> Finish loop. |
-| Cross-platform adapters              | Teams can use different AI tools while keeping the same `.trellis/` facts.                                |
-| Spec distillation                    | Lessons from one task can be promoted into `.trellis/spec/` for future tasks.                             |
+| Feature                          | What it enables                                                                                           |
+| -------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Per-session active task pointers | Multiple windows can work on different tasks without sharing one global current task.                     |
+| Subtask trees                    | Parent tasks can hold shared requirements while child tasks run their own Plan -> Execute -> Finish loop. |
+| Cross-platform adapters          | Teams can use different AI tools while keeping the same `.trellis/` facts.                                |
+| Spec distillation                | Lessons from one task can be promoted into `.trellis/spec/` for future tasks.                             |
 
 ## Feature to module map
 
@@ -71,60 +70,17 @@ Trellis treats AI coding as a workflow and knowledge-management problem, not a s
 | Planning artifact/spec injection   | Context-loading module  | `prd.md`, `design.md`, `implement.md`, `implement.jsonl`, `check.jsonl`, `inject-subagent-context.py`, platform agent preludes |
 | Research / implement / check roles | Agent and skill module  | Platform `agents/`, `skills/`, prompts, workflows                                                                              |
 | Team convention memory             | Spec module             | `.trellis/spec/**/index.md`, guideline files                                                                                   |
-| Developer memory                   | Workspace module        | `.trellis/workspace/<developer>/journal-*.md`                                                                                  |
+| Developer memory                   | Workspace module        | `.trellis/workspace/journal-*.md`                                                                                              |
 | Platform support                   | Platform adapter module | `.claude/`, `.codex/`, `.cursor/`, `.opencode/`, `.kiro/`, `.gemini/`, `.qoder/`, `.github/`, `.pi/`, and related settings     |
 | Finish and archive                 | Finish module           | `/trellis:finish-work`, `.trellis/scripts/add_session.py`, task archive scripts                                                |
 
 ## Workflow module
 
-`.trellis/workflow.md` is the source of truth for Trellis's Plan -> Execute -> Finish contract.
-
-```text
-Phase 1: Plan    -> classify the turn, get task-creation consent, write planning artifacts
-Phase 2: Execute -> implement, check, and repeat until green
-Phase 3: Finish  -> final verification, spec update, work commit, archive
-```
-
-The file owns three things:
-
-- phase definitions and numbered steps
-- skill / sub-agent routing by platform capability
-- `[workflow-state:STATUS]` blocks used by the per-turn breadcrumb hook
-
-Changing workflow behavior starts here. Platform commands, skills, and agent files may also need wording updates if they describe the same flow, but the workflow contract itself belongs in `.trellis/workflow.md`.
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ## Workflow-state module
 
-On hook-capable platforms, `inject-workflow-state.py` or the equivalent plugin runs on each user prompt.
-
-The runtime contract is:
-
-1. Resolve the Trellis root from `cwd`.
-2. Resolve the active task for the current session.
-3. Read `task.json.status`, or synthesize `no_task` when no task is active.
-4. Parse `.trellis/workflow.md`.
-5. Inject the matching `[workflow-state:STATUS]` body into `<workflow-state>...</workflow-state>`.
-
-Marker syntax:
-
-```text
-[workflow-state:planning]
-...
-[/workflow-state:planning]
-```
-
-The hook scripts are parser-only. They do not contain fallback copies of the breadcrumb text. If a matching block is missing, the hook emits `Refer to workflow.md for current step.`
-
-Default statuses:
-
-| Status        | Writer                  | Notes                                                                                                                                                    |
-| ------------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no_task`     | Synthesized by the hook | No active task pointer for the current session.                                                                                                          |
-| `planning`    | `task.py create`        | Requirements and planning artifacts are active; lightweight tasks can be PRD-only, while complex tasks need `design.md` and `implement.md` before start. |
-| `in_progress` | `task.py start`         | Implementation, checking, and finish steps are active.                                                                                                   |
-| `completed`   | `task.py archive`       | Written immediately before archive move; not normally visible as a live breadcrumb.                                                                      |
-
-`task.py create` best-effort sets the current session's active-task pointer, so `planning` is reachable during brainstorm and JSONL curation.
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ## Task store module
 
@@ -200,13 +156,13 @@ read during implementation and review, not pre-registered in JSONL.
 
 Trellis uses each platform's available primitives. The generated project files are the source of truth for an actual repository, but the default capability groups are:
 
-| Group                         | Platforms                                           | Startup context                                                         | Per-turn workflow-state                                           | Implementation/check context                                                                 |
-| ----------------------------- | --------------------------------------------------- | ----------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| Hook + hook-push sub-agent    | Claude Code, Cursor, OpenCode, CodeBuddy, Droid, Pi | Hook, plugin, or extension                                              | Hook or equivalent                                                | Hook injects JSONL entries, `prd.md`, `design.md` if present, and `implement.md` if present. |
-| Hook + pull-prelude sub-agent | Gemini CLI, Qoder, Copilot                          | Hook                                                                    | Hook                                                              | Sub-agent reads JSONL entries and task artifacts itself on startup.                          |
-| Codex                         | Codex                                               | `AGENTS.md`; `UserPromptSubmit` can inject a no-task bootstrap reminder | Optional hook when enabled (0.129+ also requires `/hooks` review) | Inline mode reads artifacts through skills; sub-agent mode uses pull-based preludes.         |
-| Kiro                          | Kiro                                                | Skill files under `.kiro/`                                              | No Trellis per-turn hook by default                               | Agent/skill files read Trellis context.                                                      |
-| Main-session workflow/skill   | Kilo, Antigravity, Devin                            | Manual workflow or skill entry                                          | No Trellis per-turn hook by default                               | Main session reads specs and task files inline.                                              |
+| Group                         | Platforms                                           | Startup context                                                        | Per-turn workflow-state                                           | Implementation/check context                                                                 |
+| ----------------------------- | --------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| Hook + hook-push sub-agent    | Claude Code, Cursor, OpenCode, CodeBuddy, Droid, Pi | Hook, plugin, or extension                                             | Hook or equivalent                                                | Hook injects JSONL entries, `prd.md`, `design.md` if present, and `implement.md` if present. |
+| Hook + pull-prelude sub-agent | Gemini CLI, Qoder, Copilot                          | Hook                                                                   | Hook                                                              | Sub-agent reads JSONL entries and task artifacts itself on startup.                          |
+| Codex                         | Codex                                               | `AGENTS.md`; `UserPromptSubmit` can inject a no-task workflow reminder | Optional hook when enabled (0.129+ also requires `/hooks` review) | Inline mode reads artifacts through skills; sub-agent mode uses pull-based preludes.         |
+| Kiro                          | Kiro                                                | Skill files under `.kiro/`                                             | No Trellis per-turn hook by default                               | Agent/skill files read Trellis context.                                                      |
+| Main-session workflow/skill   | Kilo, Antigravity, Devin                            | Manual workflow or skill entry                                         | No Trellis per-turn hook by default                               | Main session reads specs and task files inline.                                              |
 
 If the local settings file disagrees with this table, follow the local settings file. Trellis projects are intentionally customizable.
 
@@ -232,26 +188,19 @@ Removed 0.4 mechanisms:
 
 The wiki side is a set of repository files that AI sessions can reread.
 
-| Module                 | Path                              | Contents                                                                           |
-| ---------------------- | --------------------------------- | ---------------------------------------------------------------------------------- |
-| Spec library           | `.trellis/spec/`                  | Team conventions, package/layer rules, thinking guides.                            |
-| Task knowledge         | `.trellis/tasks/`                 | PRDs, technical designs, implementation plans, research, JSONL manifests, archive. |
-| Workspace memory       | `.trellis/workspace/<developer>/` | Per-developer journals and indexes.                                                |
-| Workflow reference     | `.trellis/workflow.md`            | The workflow contract and next-action prompt blocks.                               |
-| Trellis meta reference | bundled `trellis-meta` skill      | Local architecture and customization map for generated Trellis files.              |
+| Module                 | Path                         | Contents                                                                           |
+| ---------------------- | ---------------------------- | ---------------------------------------------------------------------------------- |
+| Spec library           | `.trellis/spec/`             | Team conventions, package/layer rules, thinking guides.                            |
+| Task knowledge         | `.trellis/tasks/`            | PRDs, technical designs, implementation plans, research, JSONL manifests, archive. |
+| Workspace memory       | `.trellis/workspace/`        | Per-developer journals and indexes.                                                |
+| Workflow reference     | `.trellis/workflow.md`       | The workflow contract and next-action prompt blocks.                               |
+| Trellis meta reference | bundled `trellis-meta` skill | Local architecture and customization map for generated Trellis files.              |
 
-Stable team rules belong in `.trellis/spec/`. Task-specific facts belong in the task directory. Session notes belong in `.trellis/workspace/<developer>/`.
+Stable team rules belong in `.trellis/spec/`. Task-specific facts belong in the task directory. Session notes belong in `.trellis/workspace/`.
 
 ## Finish module
 
-Trellis separates implementation, work commits, and bookkeeping:
-
-1. Implement/check agents produce a clean diff.
-2. The main session runs final verification and `trellis-update-spec`.
-3. Phase 3.4 proposes a batched commit plan, waits for one user confirmation, stages the listed files, and runs `git commit`. It does not amend and does not push.
-4. `/trellis:finish-work` classifies dirty paths, stops if current-task work is still uncommitted, archives the task, and writes the workspace journal.
-
-`/trellis:finish-work` is not the command that commits feature code. Work commits happen first; archive and journal commits are bookkeeping after that.
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ## Generated and protected files
 

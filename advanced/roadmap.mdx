@@ -14,8 +14,6 @@ Shipped as the bundled `trellis-session-insight` skill rather than a hard-coded 
 
 ### Configurable hooks
 
-Hook behavior is driven by `.trellis/config.yaml`. Current knobs: `session_commit_message`, `max_journal_lines`, `session_auto_commit`, the `hooks.after_create` / `after_start` / `after_finish` / `after_archive` task-lifecycle commands, `channel.worker_guard.idle_timeout` and `max_live_workers`, and `codex.dispatch_mode: inline | sub-agent` (the inline / sub-agent dispatch toggle that controls whether the main Codex agent edits code directly or routes through `trellis-implement` / `trellis-check` sub-agents).
-
 ### Auto runner — superseded
 
 Dropped from the roadmap. Both Claude Code (`/goal`) and Codex (autonomy mode) now ship platform-native multi-step autonomy. Adding a Trellis-side runner on top would conflict with the platform scheduler rather than complement it.
@@ -36,15 +34,15 @@ Inspired by [Karpathy's LLM Wiki pattern](https://gist.github.com/karpathy/442a6
 
 ### Team-level memory
 
-Cross-developer, cross-task memory retrieval beyond the per-developer journal that exists today. Aims to drop the "find context" cost on large legacy repos. Strongest repeat signal across user interviews. Shape depends on whether Wiki ships first (rich linked memory) or stays deferred (looser aggregation on top of `trellis mem`).
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ### TDD template
 
-Optional test-first workflow template that turns `implement → check` into `test → implement → check`. Current `trellis-check` is post-hoc. The TDD switch ships through `trellis-meta` skill; default lightweight workflow stays unchanged.
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ### Stronger brainstorm
 
-Have brainstorm do deeper code / history investigation before asking business questions, leaving questions for what truly can't be inferred from the code. Today brainstorm asks shallow questions too easily.
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ### Chinese localization
 

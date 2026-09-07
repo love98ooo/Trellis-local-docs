@@ -11,7 +11,7 @@
     "marketplace/specs/**",
     "marketplace/README.md"
   ],
-  "name": "Trellis Doc",
+  "name": "Trellis-local",
   "colors": {
     "primary": "#16A34A",
     "light": "#07C983",
@@ -44,7 +44,6 @@
                   "beta/advanced/channel",
                   "beta/advanced/roadmap",
                   "beta/advanced/custom-workflow",
-                  "beta/advanced/dynamic-workflow-switching",
                   "beta/advanced/custom-commands",
                   "beta/advanced/custom-agents",
                   "beta/advanced/custom-hooks",
@@ -530,7 +529,6 @@
                   "zh/beta/advanced/channel",
                   "zh/beta/advanced/roadmap",
                   "zh/beta/advanced/custom-workflow",
-                  "zh/beta/advanced/dynamic-workflow-switching",
                   "zh/beta/advanced/custom-commands",
                   "zh/beta/advanced/custom-agents",
                   "zh/beta/advanced/custom-hooks",

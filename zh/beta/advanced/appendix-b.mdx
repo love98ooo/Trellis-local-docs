@@ -46,10 +46,9 @@ Trellis 只保留很少的会话边界命令，其他都是 auto-trigger skill �
 
 ### 全局 CLI 命令
 
-| 命令              | 用途                                  | 用法                                           |
-| ----------------- | ------------------------------------- | ---------------------------------------------- |
-| `trellis upgrade` | 升级全局安装的 Trellis CLI package    | `trellis upgrade [--tag <tag>]`                |
-| `trellis update`  | 把当前项目的 Trellis 文件同步到此 CLI | `trellis update [--dry-run] [--migrate] [...]` |
+| 命令             | 用途                                  | 用法                                           |
+| ---------------- | ------------------------------------- | ---------------------------------------------- |
+| `trellis update` | 把当前项目的 Trellis 文件同步到此 CLI | `trellis update [--dry-run] [--migrate] [...]` |
 
 ### `task.py` 子命令
 
@@ -67,7 +66,7 @@ Trellis 只保留很少的会话边界命令，其他都是 auto-trigger skill �
 | `add-subtask`     | 链接子任务到父任务                                                         | `task.py add-subtask <父任务目录> <子任务目录>`                    |
 | `remove-subtask`  | 解除子任务关联                                                             | `task.py remove-subtask <父任务目录> <子任务目录>`                 |
 | `archive`         | 归档任务                                                                   | `task.py archive <name>`                                           |
-| `list`            | 列出活跃任务                                                               | `task.py list [--mine] [--status <s>]`                             |
+| `list`            | 列出活跃任务                                                               | `task.py list  [--status <s>]`                                     |
 | `list-archive`    | 列出归档任务                                                               | `task.py list-archive [YYYY-MM]`                                   |
 
 ### Python 脚本

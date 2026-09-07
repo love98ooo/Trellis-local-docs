@@ -1,39 +1,14 @@
 ---
-title: 'Multi-Platform and Team Configuration'
+title: 'Multi-Platform Configuration'
 ---
 
-## Multi-Platform and Team Configuration
+## Multi-Platform Configuration
 
 Trellis ships on 22 platforms (Claude Code, Cursor, OpenCode, Codex, Kiro, Kilo, Gemini CLI, Antigravity, Devin (formerly Windsurf), Qoder, CodeBuddy, GitHub Copilot, Droid, Pi Agent, Oh My Pi, Reasonix, ZCode, Trae, Grok Build, Kimi Code, Snow CLI, DeepSeek Harness) and additionally supports any AI coding agent that reads the `.agents/skills/` standard (Amp, Cline, Deep Agents, Firebender, Warp, and more). The `.trellis/` core is identical everywhere; what differs is **how hooks, extensions, skills, sub-agents, and commands are delivered** on each platform.
 
-### Joining an Already-Initialized Trellis Project
+### Add platforms in an existing worktree
 
-Someone else already ran `trellis init` on the repo and you're joining as a new team member. Just run `trellis init` — the CLI detects the existing setup and offers three choices:
-
-```
-? Trellis is already initialized. What would you like to do?
-❯ Add AI platform(s)
-  Set up developer identity on this device
-  Full re-initialize
-```
-
-| Option                                       | When to pick                                                                                                    |
-| -------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **Add AI platform(s)**                       | You want to add a platform others haven't configured (e.g. you use Cursor but the team only set up Claude Code) |
-| **Set up developer identity on this device** | You're a new member, you just need to write your **identity** on your machine                                   |
-| **Full re-initialize**                       | Project config is broken and you want a clean slate                                                             |
-
-New members pick the second option. The CLI asks for your developer name (defaulting to your Git user), then:
-
-- Writes `.trellis/.developer` with your developer name (gitignored, per-machine)
-- Creates `.trellis/workspace/<your-name>/` for your own journal
-
-After that, on platforms with a SessionStart hook or extension, opening a new session auto-injects Trellis context. On platforms without automatic session injection, run `/trellis:start` or the platform's start workflow.
-
-<Note>
-  Don't pick **Full re-initialize** — it overwrites existing `.trellis/`, `.claude/`, etc.
-  configuration and affects the whole team.
-</Note>
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 ### Capability Matrix
 
@@ -78,7 +53,7 @@ Commands: `start`, `finish-work`, `continue` under `.claude/commands/trellis/`.
 ### Cursor
 
 ```bash
-trellis init -u your-name --cursor
+trellis init  --cursor
 ```
 
 Cursor is a full class-1 platform: real hooks, real sub-agents, real skills.
@@ -94,7 +69,7 @@ Layout:
 ### OpenCode
 
 ```bash
-trellis init -u your-name --opencode
+trellis init  --opencode
 ```
 
 OpenCode 1.2.x is a class-1 platform (real hooks + real sub-agents):
@@ -109,7 +84,7 @@ Plugins are factory functions (OpenCode 1.2+). Trellis generates them so behavio
 ### Codex
 
 ```bash
-trellis init -u your-name --codex
+trellis init  --codex
 ```
 
 Layout:
@@ -136,7 +111,7 @@ Codex 0.129+ also gates each installed hook behind a one-time `/hooks` TUI revie
 ### Kiro
 
 ```bash
-trellis init -u your-name --kiro
+trellis init  --kiro
 ```
 
 Layout:
@@ -161,7 +136,7 @@ Layout:
 ### Gemini CLI
 
 ```bash
-trellis init -u your-name --gemini
+trellis init  --gemini
 ```
 
 Layout:
@@ -175,7 +150,7 @@ Layout:
 ### Qoder
 
 ```bash
-trellis init -u your-name --qoder
+trellis init  --qoder
 ```
 
 Skills work on both the Qoder IDE and the Qoder CLI. Commands work on the CLI only — the IDE's `/` menu lists instructions an administrator configures in the Qoder console and does not read files from your project, so Trellis's commands will not appear there. On the IDE, use the skills: the model triggers them from what you ask for.
@@ -193,7 +168,7 @@ Layout:
 ### CodeBuddy
 
 ```bash
-trellis init -u your-name --codebuddy
+trellis init  --codebuddy
 ```
 
 CodeBuddy is a full class-1 platform (real hooks + real sub-agents).
@@ -209,7 +184,7 @@ Layout:
 ### GitHub Copilot
 
 ```bash
-trellis init -u your-name --copilot
+trellis init  --copilot
 ```
 
 Layout:
@@ -224,7 +199,7 @@ Layout:
 ### Droid
 
 ```bash
-trellis init -u your-name --droid
+trellis init  --droid
 ```
 
 Droid (factory.ai) is a class-1 platform with hooks + sub-agents:
@@ -237,7 +212,7 @@ Droid (factory.ai) is a class-1 platform with hooks + sub-agents:
 ### Pi Agent
 
 ```bash
-trellis init -u your-name --pi
+trellis init  --pi
 ```
 
 Pi Agent is extension-backed rather than Python-hook-backed. Trellis writes the same workflow primitives, then the extension resolves the current session id and injects task context before Bash commands and sub-agent runs.
@@ -255,7 +230,7 @@ The extension stores active task state under `.trellis/.runtime/sessions/<sessio
 ### Oh My Pi
 
 ```bash
-trellis init -u your-name --omp
+trellis init  --omp
 ```
 
 Oh My Pi is extension-backed, like Pi Agent. Trellis writes the same workflow primitives, then the extension resolves the current session id and injects task context before Bash commands and sub-agent runs. Unlike Pi Agent, Oh My Pi has no `settings.json` — the native provider auto-discovers all subdirectories under `.omp/`.
@@ -300,14 +275,12 @@ Python 3.9+ is required for `.trellis/scripts/` and any Python hooks. OpenCode p
 
 Per-developer isolation (no conflicts):
 
-- `.trellis/workspace/{name}/`: each developer's own journals and index
-- `.trellis/.developer`: gitignored
+- `.trellis/workspace/`: each developer's own journals and index
 - `.trellis/.runtime/`: gitignored session runtime; each AI session/window has its own active task file
 
 Shared state (coordinate via PR):
 
-- `.trellis/spec/`: team conventions, PR-reviewed like any code
-- `.trellis/tasks/`: task JSONs; explicit `--assignee` avoids collisions
+See `.trellis/workflow.md` in the current worktree and the [workflow template source](https://github.com/love98ooo/Trellis/blob/main/packages/cli/src/templates/trellis/workflow.md).
 
 Important spec changes should be discussed in reviews; treat the spec library as team code.
 

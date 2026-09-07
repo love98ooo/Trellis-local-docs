@@ -46,10 +46,9 @@ Available as real sub-agents on Claude Code, Cursor, OpenCode, Codex, Kiro, Gemi
 
 ### Global CLI Commands
 
-| Command           | Purpose                                              | Usage                                          |
-| ----------------- | ---------------------------------------------------- | ---------------------------------------------- |
-| `trellis upgrade` | Upgrade the globally installed Trellis CLI package   | `trellis upgrade [--tag <tag>]`                |
-| `trellis update`  | Sync the current project's Trellis files to this CLI | `trellis update [--dry-run] [--migrate] [...]` |
+| Command          | Purpose                                              | Usage                                          |
+| ---------------- | ---------------------------------------------------- | ---------------------------------------------- |
+| `trellis update` | Sync the current project's Trellis files to this CLI | `trellis update [--dry-run] [--migrate] [...]` |
 
 ### `task.py` Subcommands
 
@@ -67,7 +66,7 @@ Available as real sub-agents on Claude Code, Cursor, OpenCode, Codex, Kiro, Gemi
 | `add-subtask`     | Link child to parent                                                                              | `task.py add-subtask <parent-dir> <child-dir>`                     |
 | `remove-subtask`  | Unlink child from parent                                                                          | `task.py remove-subtask <parent-dir> <child-dir>`                  |
 | `archive`         | Archive task                                                                                      | `task.py archive <name>`                                           |
-| `list`            | List active tasks                                                                                 | `task.py list [--mine] [--status <s>]`                             |
+| `list`            | List active tasks                                                                                 | `task.py list  [--status <s>]`                                     |
 | `list-archive`    | List archived tasks                                                                               | `task.py list-archive [YYYY-MM]`                                   |
 
 ### Python Scripts

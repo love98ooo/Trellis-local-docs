@@ -3,6 +3,8 @@ title: 'Quickstart'
 description: 'Set up Trellis in your project'
 ---
 
+Run `pnpm local:install` once in the fork source repository. The installer retains a fixed build and provides `~/.local/bin/trellis-local`; add `~/.local/bin` to PATH. Reuse this command in every worktree without reinstalling.
+
 ## Prerequisites
 
 | Requirement | Minimum    | Why                                                                          |
@@ -11,65 +13,58 @@ description: 'Set up Trellis in your project'
 | **Python**  | 3.9        | Hooks and automation scripts (`python` on Windows, `python3` on macOS/Linux) |
 | **git**     | any recent | Task branching, worktrees, and commit metadata                               |
 
-`trellis init` checks the same Python command it will render into generated
+`trellis-local init` checks the same Python command it will render into generated
 files: `python --version` on Windows, `python3 --version` on macOS/Linux. If
 that command is older than 3.9, init warns but does not block.
 
 ## Install Trellis
 
-First, install the CLI globally:
+Run in the fork source repository:
 
 ```bash
-npm install -g @mindfoldhq/trellis
+pnpm local:install
 ```
 
 Then initialize in your project:
 
 ```bash
-trellis init
+trellis-local init
 ```
-
-<Tip>
-Trellis uses your name to create a personal workspace directory. If you don't specify `-u`, it will automatically detect from `git config user.name`.
-
-To specify manually: `trellis init -u john` (replace `john` with your actual name).
-
-</Tip>
 
 ### Platform selection
 
-By default, `trellis init` sets up for Claude Code. To include other platforms:
+By default, `trellis-local init` sets up for Claude Code. To include other platforms:
 
 ```bash
 # Include Cursor support
-trellis init --cursor
+trellis-local init --cursor
 
 # Include multiple platforms
-trellis init --cursor --pi
+trellis-local init --cursor --pi
 
 # All available platform flags
-trellis init --claude       # Claude Code (default)
-trellis init --cursor       # Cursor IDE
-trellis init --opencode     # OpenCode
-trellis init --codex        # Codex
-trellis init --kiro         # Kiro
-trellis init --gemini       # Gemini CLI
-trellis init --qoder        # Qoder
-trellis init --codebuddy    # CodeBuddy
-trellis init --copilot      # GitHub Copilot
-trellis init --droid        # Factory Droid
-trellis init --pi           # Pi Agent
-trellis init --kilo         # Kilo
-trellis init --antigravity  # Antigravity
-trellis init --devin        # Devin (formerly Windsurf)
+trellis-local init --claude       # Claude Code (default)
+trellis-local init --cursor       # Cursor IDE
+trellis-local init --opencode     # OpenCode
+trellis-local init --codex        # Codex
+trellis-local init --kiro         # Kiro
+trellis-local init --gemini       # Gemini CLI
+trellis-local init --qoder        # Qoder
+trellis-local init --codebuddy    # CodeBuddy
+trellis-local init --copilot      # GitHub Copilot
+trellis-local init --droid        # Factory Droid
+trellis-local init --pi           # Pi Agent
+trellis-local init --kilo         # Kilo
+trellis-local init --antigravity  # Antigravity
+trellis-local init --devin        # Devin (formerly Windsurf)
 ```
 
 ### Other useful flags
 
 ```bash
-trellis init -t electron-fullstack   # Use a spec template
-trellis init --overwrite             # Overwrite existing specs when using template
-trellis init --append                # Only add missing files from template
+trellis-local init -t electron-fullstack   # Use a spec template
+trellis-local init --overwrite             # Overwrite existing specs when using template
+trellis-local init --append                # Only add missing files from template
 ```
 
 ### What gets created
@@ -94,33 +89,34 @@ For Claude Code, it also sets up `.claude/` with hooks, skills, agents, and sess
 When a new version is released:
 
 ```bash
-npm install -g @mindfoldhq/trellis
-trellis update
+pnpm local:install  # in the fork source repository
+cd /path/to/your-project
+trellis-local update
 ```
 
 Useful update flags:
 
 ```bash
-trellis update --dry-run     # Preview changes without applying
-trellis update --force       # Overwrite all managed files
-trellis update --migrate     # Run file migrations (renames, deletes)
+trellis-local update --dry-run     # Preview changes without applying
+trellis-local update --force       # Overwrite all managed files
+trellis-local update --migrate     # Run file migrations (renames, deletes)
 ```
 
-`trellis update` only touches unmodified files. Your customizations stay intact. A timestamped backup is created automatically before any changes.
+`trellis-local update` only touches unmodified files. Your customizations stay intact. A timestamped backup is created automatically before any changes.
 
 ## Uninstalling Trellis
 
 To remove every file Trellis wrote into a project — `.trellis/` itself plus the platform-specific files under `.claude/`, `.cursor/`, `.codex/`, `.pi/`, etc. — run:
 
 ```bash
-trellis uninstall              # interactive: lists what will be deleted/modified, asks Continue?
-trellis uninstall --dry-run    # only print the plan, change nothing
-trellis uninstall --yes        # skip the prompt (for scripts)
+trellis-local uninstall              # interactive: lists what will be deleted/modified, asks Continue?
+trellis-local uninstall --dry-run    # only print the plan, change nothing
+trellis-local uninstall --yes        # skip the prompt (for scripts)
 ```
 
 Trellis only removes files it tracks in `.trellis/.template-hashes.json`. Files you added under managed directories (e.g. your own hook scripts under `.claude/hooks/`) are never deleted. Structured config files such as `.claude/settings.json` keep your custom fields; only the trellis-owned hook entries are stripped.
 
-## Write your first spec
+## Add specs when needed
 
 Open `.trellis/spec/backend/index.md` (or `frontend/` if that's your focus) and fill in the template.
 

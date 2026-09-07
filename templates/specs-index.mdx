@@ -6,16 +6,20 @@ description: 'Coding convention templates for common tech stacks'
 Spec templates help you quickly set up coding guidelines for your project. Download, customize, use.
 
 <Info>
-**Specs are meant to be customized.** Trellis ships with empty spec templates by default — they are placeholders for *your* project's conventions. Every team's stack, patterns, and quality bar are different, so the specs you write should reflect your actual codebase, not generic best practices. Templates from the marketplace give you a head start, but always tailor them to your project.
+  **Specs are meant to be customized.** Trellis ships with empty spec templates by default — they
+  are placeholders for *your* project's conventions. Every project's stack, patterns, and quality
+  bar are different, so the specs you write should reflect your actual codebase, not generic best
+  practices. Templates from the marketplace give you a head start, but always tailor them to your
+  project.
 </Info>
 
 ## Available Templates
 
-| Template                                                                                                            | Stack      | Description                              |
-| ------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------- |
+| Template                                                                                                               | Stack      | Description                              |
+| ---------------------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------- |
 | [Electron + React + TypeScript](https://github.com/mindfold-ai/Trellis/tree/main/marketplace/specs/electron-fullstack) | Full-stack | Electron desktop app with React frontend |
-| [Next.js + oRPC + PostgreSQL](https://github.com/mindfold-ai/Trellis/tree/main/marketplace/specs/nextjs-fullstack) | Full-stack | Next.js app with oRPC API and PostgreSQL |
-| [CF Workers + Hono + Turso](https://github.com/mindfold-ai/Trellis/tree/main/marketplace/specs/cf-workers-fullstack) | Full-stack | Cloudflare Workers with Hono and Turso |
+| [Next.js + oRPC + PostgreSQL](https://github.com/mindfold-ai/Trellis/tree/main/marketplace/specs/nextjs-fullstack)     | Full-stack | Next.js app with oRPC API and PostgreSQL |
+| [CF Workers + Hono + Turso](https://github.com/mindfold-ai/Trellis/tree/main/marketplace/specs/cf-workers-fullstack)   | Full-stack | Cloudflare Workers with Hono and Turso   |
 
 <CardGroup cols={3}>
   <Card
@@ -50,7 +54,7 @@ Starting from v0.3.6, you can fetch spec templates directly from any Git reposit
 trellis init --registry https://github.com/your-org/your-spec-templates
 
 # Combine with platform flags
-trellis init --registry https://github.com/your-org/your-spec-templates --cursor -u your-name
+trellis init --registry https://github.com/your-org/your-spec-templates --cursor
 ```
 
 ### How it works
@@ -119,7 +123,9 @@ spec/
 5. Update paths and examples to match your codebase
 
 <Tip>
-You don't have to fill every spec file at once. Start with the areas that matter most to your project, then expand over time. The bootstrap task created by `trellis init` will guide you through the initial fill.
+  You don't have to fill every spec file at once. Start with the areas that matter most to your
+  project, then expand over time. The bootstrap task created by `trellis init` will guide you
+  through the initial fill.
 </Tip>
 
 ## Contributing Templates

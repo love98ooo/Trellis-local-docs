@@ -5,7 +5,7 @@ title: '定制 Spec Template Marketplace'
 ## 定制 Spec Template Marketplace
 
 Spec template marketplace 是一个 Git source，`trellis init --registry` 可以从
-里面拉取一套 `.trellis/spec/` 起点。团队有很多仓库、但希望它们从同一套工程约定开始时，就该用这个。
+里面拉取一套 `.trellis/spec/` 起点。个人项目有很多仓库、但希望它们从同一套工程约定开始时，就该用这个。
 
 它适合放可复用的工程规范：框架目录、API 模式、测试规则、发布规则、review checklist，以及 agent
 写代码前应该看到的真实示例。它不是远程任务库，也不应该放项目运行态。
@@ -68,7 +68,7 @@ my-spec-marketplace/
 模板目录里应该直接放最终会出现在 `.trellis/spec/` 里的文件。不要再包一层 `spec/`，除非你真的想安装后得到
 `.trellis/spec/spec/...`。
 
-里面的文件夹名是团队约定，不是 Trellis 强制要求。`frontend/`、`backend/`、`shared/`、`guides/`
+里面的文件夹名是项目约定，不是 Trellis 强制要求。`frontend/`、`backend/`、`shared/`、`guides/`
 只是常见拆法，因为把大规则按领域拆开后，agent 更容易加载到相关内容。
 
 ### index.json 合约
@@ -134,7 +134,7 @@ trellis init --registry gh:myorg/my-spec-marketplace/marketplace --template web-
 trellis init --registry gh:myorg/my-spec-marketplace/marketplace --template web-app --append
 ```
 
-安装后，目标项目拥有自己的 `.trellis/spec/`。模板只是起点，不是一个会被远程同步的 wiki。团队应该继续编辑项目里的
+安装后，目标项目拥有自己的 `.trellis/spec/`。模板只是起点，不是一个会被远程同步的 wiki。个人项目应该继续编辑项目里的
 spec，让它反映当前仓库真实情况。
 
 ### 适合放什么
@@ -157,7 +157,7 @@ spec，让它反映当前仓库真实情况。
 
 ### 版本与发布
 
-把 template id 当成团队内部的公开 API。需要破坏性重写时，发一个新 id，比如 `web-app-v2`；或者让旧行为固定到
+把 template id 当成个人项目内部的公开 API。需要破坏性重写时，发一个新 id，比如 `web-app-v2`；或者让旧行为固定到
 某个 Git ref：
 
 ```bash

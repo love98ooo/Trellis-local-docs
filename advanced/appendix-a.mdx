@@ -18,7 +18,6 @@ title: 'Appendix A: Key File Paths Quick Reference'
 | `.trellis/config.yaml`                          | Packages, update.skip, task hooks     | Init and updates                  |
 | `.trellis/.version`                             | Current Trellis version               | Updates                           |
 | `.trellis/.template-hashes.json`                | Template file hashes                  | Updates                           |
-| `.trellis/.developer`                           | Developer identity                    | Every session                     |
 | `.trellis/.runtime/sessions/<session-key>.json` | Active task for one AI session/window | Continue, hooks, sub-agent launch |
 
 ### Shipped commands (Claude Code)
@@ -77,13 +76,11 @@ Each platform writes into its own directory (see chapter 13 for the full layout)
 
 ### Scripts
 
-| Script                                 | Function                   |
-| -------------------------------------- | -------------------------- |
-| `.trellis/scripts/task.py`             | Task management            |
-| `.trellis/scripts/get_context.py`      | Session context            |
-| `.trellis/scripts/add_session.py`      | Record session             |
-| `.trellis/scripts/create_bootstrap.py` | First-time spec bootstrap  |
-| `.trellis/scripts/get_developer.py`    | Developer identity utility |
-| `.trellis/scripts/init_developer.py`   | Developer initialization   |
+| Script                                 | Function                  |
+| -------------------------------------- | ------------------------- |
+| `.trellis/scripts/task.py`             | Task management           |
+| `.trellis/scripts/get_context.py`      | Session context           |
+| `.trellis/scripts/add_session.py`      | Record session            |
+| `.trellis/scripts/create_bootstrap.py` | First-time spec bootstrap |
 
 ---
